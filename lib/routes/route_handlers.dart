@@ -1,18 +1,18 @@
 import 'package:couple_space_app/pages/album/index.dart';
 import 'package:couple_space_app/pages/album/photos.dart';
 import 'package:couple_space_app/pages/home/index.dart';
+import 'package:couple_space_app/pages/home/tabview/chat.dart';
+import 'package:couple_space_app/pages/home/tabview/discovery.dart';
 import 'package:couple_space_app/pages/login/index.dart';
 import '../pages/login/register.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-
 
 /// 登录
 var loginHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return LoginPage();
 });
-
 
 /// 登录-注册
 var registerHandler = Handler(
@@ -39,4 +39,16 @@ var albumPhotosHandler = Handler(
   final albumId = params['albumId']!.first;
   final albumName = params['albumName']!.first;
   return AlbumPhotosPage(albumId: albumId, albumName: albumName);
+});
+
+/// 发现
+var discoveryHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return DiscoveryPage();
+});
+
+/// 聊天
+var chatHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return ChatPage();
 });

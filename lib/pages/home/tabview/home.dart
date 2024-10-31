@@ -1,17 +1,30 @@
+import 'package:couple_space_app/cp_application.dart';
 import 'package:couple_space_app/pages/login/index.dart';
 import 'package:couple_space_app/widgets/notification_button.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class IndexPage extends StatefulWidget {
-  const IndexPage({super.key});
+  late String userName = "XXXX";
 
   @override
   State<IndexPage> createState() => _IndexPageState();
 }
 
 class _IndexPageState extends State<IndexPage> {
-  // 用来判断是否绑定了另一半
-  bool isPartnerBound = true;
+  File? _image;
+
+  String get _userName => widget.userName;
+
+  // 上传图片, TODO 数据库添加个人背景图，在集成oss存放再来改造
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result == null) return;
+    setState(() {
+      _image = File(result.files.single.path!);
+    });
+  }
 
   void _navigateToNotifications() {
     Navigator.push(
@@ -32,159 +45,220 @@ class _IndexPageState extends State<IndexPage> {
           NotificationButton(onPressed: _navigateToNotifications),
         ],
       ),
-      body: isPartnerBound ? _partnerBoundPage() : _noPartnerBoundPage(),
-    );
-  }
-
-  // 已绑定情侣
-  Widget _partnerBoundPage() {
-    return Column(
-      children: [
-        // 顶部照片背景
-        Container(
-          height: 200,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('images/default_cp_bg.png'), // 替换为你的照片路径
-              fit: BoxFit.contain,
-            ),
-          )
-        ),
-        // 功能菜单
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildMenuItem("纪念日", Icons.calendar_month),
-            _buildMenuItem("相册", Icons.photo),
-            _buildMenuItem("个人中心", Icons.person),
-          ],
-        ),
-        // 灰色分隔线和动态内容
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(child: Container(height: 1, color: Colors.grey)),
-              Container(
-                width: 10,
-                height: 10,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            GestureDetector(
+              onTap: _pickImage,
+              child: DrawerHeader(
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey,
+                  image: DecorationImage(
+                    fit: BoxFit.contain,
+                    image: _image != null
+                        ? FileImage(_image!)
+                        : const AssetImage('images/default_cp_bg.png')
+                            as ImageProvider,
+                  ),
                 ),
-              ),
-              Expanded(child: Container(height: 1, color: Colors.grey)),
-            ],
-          ),
-        ),
-        // 动态内容区域
-        Expanded(
-          child: Center(child: Text("动态内容展示区")),
-        ),
-        // 打卡按钮
-        Padding(
-          padding: const EdgeInsets.only(right: 16.0, bottom: 8.0),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO 添加打卡逻辑
-              },
-              child: Text("打卡"),
-            ),
-          ),
-        ),
-        // 发布按钮
-        Padding(
-          padding: const EdgeInsets.only(right: 16.0, bottom: 16.0),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO 添加发布逻辑
-              },
-              child: Text("发布"),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // 功能菜单
-  Widget _buildMenuItem(String title, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, size: 40),
-        SizedBox(height: 8),
-        Text(title),
-      ],
-    );
-  }
-
-  // 未绑定情侣
-  Widget _noPartnerBoundPage() {
-    return Column(
-      children: [
-        // 顶部图片
-        Container(
-          height: 200, // 设置图片的高度
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('images/invite.png'), // 替换为你的图片路径
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        // 中间的灰色横线和圆形头像
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-                child: Divider(
-              color: Colors.grey,
-              thickness: 0.1,
-            )),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10),
-              width: 50, // 头像的宽度
-              height: 50, // 头像的高度
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage('images/default_avatar.png'), // 替换为头像路径
-                  fit: BoxFit.cover,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '你好$_userName',
+                      style: TextStyle(
+                          color: Colors.black, fontSize: 24), // 改变文字颜色以便在图片上可见
+                    ),
+                  ],
                 ),
               ),
             ),
-            Expanded(
-                child: Divider(
-              color: Colors.grey,
-              thickness: 0.1,
-            )),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('个人中心'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('退出登录'),
+              onTap: () {},
+            ),
           ],
         ),
-        // 个人中心
-        TextButton(
-          onPressed: () {
-            // TODO 这里可以添加导航到个人中心的逻辑
-          },
-          child: Text("个人中心"),
+      ),
+      body: _IndexHomeContentArea(),
+    );
+  }
+}
+
+/// 主体内容
+class _IndexHomeContentArea extends StatefulWidget {
+  @override
+  State createState() {
+    return _IndexHomeContentAreaState();
+  }
+}
+
+class _IndexHomeContentAreaState extends State<_IndexHomeContentArea> {
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+        child: Column(
+      children: [
+        ImageSection(image: 'images/homebg.png'),
+        TitleSection(
+          spaceName: '情侣空间',
+          coupleNames: 'XXX && XXX',
+          days: "000",
         ),
-        // 搜索框
+        ButtonSection(),
+        DynamicMessageSection(
+          description:
+              "123123123123123123123123123123123123",
+          images: ['images/invite.png'],
+        ),
+        DynamicMessageSection(
+          description:
+          "123123123123123123123123123123123123123",
+          images: ['images/invite.png'],
+        ),
+      ],
+    ));
+  }
+}
+
+class TitleSection extends StatelessWidget {
+  const TitleSection({
+    super.key,
+    required this.spaceName,
+    required this.coupleNames,
+    required this.days
+  });
+
+  final String spaceName;
+  final String coupleNames;
+  final String days;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Row(
+        children: [
+          Expanded(
+            /*1*/
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /*2*/
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    spaceName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  coupleNames,
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          /*3*/
+          // #docregion icon
+          Icon(
+            Icons.favorite,
+            color: Colors.pink[300],
+          ),
+          // #enddocregion icon
+           Text("我们在一起 $days 天啦！"),
+        ],
+      ),
+    );
+  }
+}
+
+class ButtonSection extends StatelessWidget {
+  const ButtonSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          GestureDetector(
+            onTap: () {
+              // TODO 处理纪念日按钮点击事件
+              print('纪念日按钮被点击');
+            },
+            child: const ButtonWithText(
+              color: Color(0xFFF394B6),
+              icon: Icons.calendar_month,
+              label: '纪念日',
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              CpApplication.router.navigateTo(context, '/album');
+            },
+            child: const ButtonWithText(
+              color: Color(0xFFF394B6),
+              icon: Icons.photo_album,
+              label: '相册',
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              // 处理动态按钮点击事件
+              print('动态按钮被点击');
+            },
+            child: const ButtonWithText(
+              color: Color(0xFFF394B6),
+              icon: Icons.message,
+              label: '动态',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class ButtonWithText extends StatelessWidget {
+  const ButtonWithText({
+    super.key,
+    required this.color,
+    required this.icon,
+    required this.label,
+  });
+
+  final Color color;
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, color: color),
         Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            decoration: InputDecoration(
-              labelText: '搜索对方账号',
-              border: OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-                  // TODO 添加搜索逻辑
-                },
-              ),
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: color,
             ),
           ),
         ),
@@ -192,3 +266,173 @@ class _IndexPageState extends State<IndexPage> {
     );
   }
 }
+
+class DynamicMessageSection extends StatelessWidget {
+  const DynamicMessageSection({
+    super.key,
+    required this.description,
+    required this.images,
+  });
+
+  final String description;
+  final List<String> images;
+
+  @override
+  Widget build(BuildContext context) {
+    final limitedImages = images.take(9).toList(); // 限制最多9张图片
+
+    return Container(
+      width: 600, // 设置组件宽度
+      padding: const EdgeInsets.all(62),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 显示图片
+          SizedBox(
+            height: 200,
+            child: limitedImages.length == 1
+                ? Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: Image.asset(limitedImages[0], fit: BoxFit.cover),
+            )
+                : limitedImages.length <= 3
+                ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: limitedImages.map((image) {
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Image.asset(image, fit: BoxFit.cover),
+                  ),
+                );
+              }).toList(),
+            )
+                : GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, // 3列
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: limitedImages.length,
+              itemBuilder: (context, index) {
+                return Image.asset(limitedImages[index], fit: BoxFit.cover);
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            description,
+            softWrap: true,
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.thumb_up),
+                onPressed: () {
+                  print('点赞');
+                },
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.comment),
+                onPressed: () {
+                  print('评论');
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+// #docregion image-asset
+class ImageSection extends StatelessWidget {
+  const ImageSection({super.key, required this.image});
+
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    // #docregion image-asset
+    return Image.asset(
+      image,
+      width: 360,
+      height: 240,
+      fit: BoxFit.cover,
+    );
+    // #enddocregion image-asset
+  }
+}
+// #enddocregion image-section
+
+// #docregion favorite-widget
+class FavoriteWidget extends StatefulWidget {
+  const FavoriteWidget({super.key});
+
+  @override
+  State<FavoriteWidget> createState() => _FavoriteWidgetState();
+}
+// #enddocregion favorite-widget
+
+// #docregion favorite-state, favorite-state-fields, favorite-state-build
+class _FavoriteWidgetState extends State<FavoriteWidget> {
+  // #enddocregion favorite-state-build
+  bool _isFavorited = true;
+  int _favoriteCount = 41;
+
+  // #enddocregion favorite-state-fields
+
+  // #docregion toggle-favorite
+  void _toggleFavorite() {
+    setState(() {
+      if (_isFavorited) {
+        _favoriteCount -= 1;
+        _isFavorited = false;
+      } else {
+        _favoriteCount += 1;
+        _isFavorited = true;
+      }
+    });
+  }
+
+  // #enddocregion toggle-favorite
+
+  // #docregion favorite-state-build
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(0),
+          child: IconButton(
+            padding: const EdgeInsets.all(0),
+            alignment: Alignment.center,
+            icon: (_isFavorited
+                ? const Icon(Icons.star)
+                : const Icon(Icons.star_border)),
+            color: Colors.red[500],
+            onPressed: _toggleFavorite,
+          ),
+        ),
+        SizedBox(
+          width: 18,
+          child: SizedBox(
+            child: Text('$_favoriteCount'),
+          ),
+        ),
+      ],
+    );
+  }
+// #docregion favorite-state-fields
+}
+// #enddocregion favorite-state, favorite-state-fields, favorite-state-build

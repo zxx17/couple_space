@@ -10,6 +10,8 @@ class Routes {
   static String register ="/login/register";
   static String album = "/album";
   static String albumPhotos = "/album/photo";
+  static String discovery = 'discovery';
+  static String chat = 'chat';
 
   static void configureRoutes(FluroRouter router) {
     //处理未匹配到路由时展示的页面
@@ -23,5 +25,8 @@ class Routes {
     router.define(album, handler: albumHandler);
     router.define(albumPhotos, handler: albumPhotosHandler);
     router.define(register, handler: registerHandler);
+    router.define(discovery, handler: discoveryHandler);
+    router.define(chat, handler: chatHandler);
+
   }
 }
