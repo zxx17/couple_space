@@ -35,9 +35,9 @@ var albumHandler = Handler(
 /// 相册-照片
 var albumPhotosHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  //接收传的参数
-  final albumId = params['albumId']!.first;
-  final albumName = params['albumName']!.first;
+  // 接收传的参数
+  final albumId = params['albumId']?.first ?? '';
+  final albumName = params['albumName']?.first ?? '';
   return AlbumPhotosPage(albumId: albumId, albumName: albumName);
 });
 

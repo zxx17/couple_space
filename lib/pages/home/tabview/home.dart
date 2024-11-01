@@ -33,9 +33,12 @@ class _IndexPageState extends State<IndexPage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // 头部
       appBar: AppBar(
         centerTitle: true,
         title: const Text("主页",
@@ -45,6 +48,7 @@ class _IndexPageState extends State<IndexPage> {
           NotificationButton(onPressed: _navigateToNotifications),
         ],
       ),
+      // 侧边栏
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -87,6 +91,7 @@ class _IndexPageState extends State<IndexPage> {
           ],
         ),
       ),
+      // 主体
       body: _IndexHomeContentArea(),
     );
   }
@@ -94,6 +99,14 @@ class _IndexPageState extends State<IndexPage> {
 
 /// 主体内容
 class _IndexHomeContentArea extends StatefulWidget {
+
+  var cpSpaceHomeInfo = {
+    'spaceBackgroundImageUrl': 'images/homebg.png',
+    'spaceName': '您还没有绑定情侣空间',
+    'coupleNames': 'xx && xx',
+    'days': '000'
+  };
+
   @override
   State createState() {
     return _IndexHomeContentAreaState();
@@ -101,12 +114,14 @@ class _IndexHomeContentArea extends StatefulWidget {
 }
 
 class _IndexHomeContentAreaState extends State<_IndexHomeContentArea> {
+  String? get _spaceBackgroundImageUrl => widget.cpSpaceHomeInfo['spaceBackgroundImageUrl'];
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Column(
       children: [
-        ImageSection(image: 'images/homebg.png'),
+        ImageSection(image: _spaceBackgroundImageUrl),
         TitleSection(
           spaceName: '情侣空间',
           coupleNames: 'XXX && XXX',
@@ -114,14 +129,12 @@ class _IndexHomeContentAreaState extends State<_IndexHomeContentArea> {
         ),
         ButtonSection(),
         DynamicMessageSection(
-          description:
-              "123123123123123123123123123123123123",
-          images: ['images/invite.png'],
+          description: "xxx发布的动态：000000",
+          images: ['images/dymessage.png'],
         ),
         DynamicMessageSection(
-          description:
-          "123123123123123123123123123123123123123",
-          images: ['images/invite.png'],
+          description: "zzzz发布的动态：11111",
+          images: ['images/dymessage.png'],
         ),
       ],
     ));
@@ -129,12 +142,11 @@ class _IndexHomeContentAreaState extends State<_IndexHomeContentArea> {
 }
 
 class TitleSection extends StatelessWidget {
-  const TitleSection({
-    super.key,
-    required this.spaceName,
-    required this.coupleNames,
-    required this.days
-  });
+  const TitleSection(
+      {super.key,
+      required this.spaceName,
+      required this.coupleNames,
+      required this.days});
 
   final String spaceName;
   final String coupleNames;
@@ -177,7 +189,7 @@ class TitleSection extends StatelessWidget {
             color: Colors.pink[300],
           ),
           // #enddocregion icon
-           Text("我们在一起 $days 天啦！"),
+          Text("我们在一起 $days 天啦！"),
         ],
       ),
     );
@@ -231,7 +243,6 @@ class ButtonSection extends StatelessWidget {
   }
 }
 
-
 class ButtonWithText extends StatelessWidget {
   const ButtonWithText({
     super.key,
@@ -250,15 +261,15 @@ class ButtonWithText extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, color: color),
+        Icon(icon, color: color,size: 42,),
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 15,
               fontWeight: FontWeight.w400,
-              color: color,
+              color: Colors.black,
             ),
           ),
         ),
@@ -292,33 +303,35 @@ class DynamicMessageSection extends StatelessWidget {
             height: 200,
             child: limitedImages.length == 1
                 ? Container(
-              width: double.infinity,
-              height: double.infinity,
-              child: Image.asset(limitedImages[0], fit: BoxFit.cover),
-            )
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Image.asset(limitedImages[0], fit: BoxFit.cover),
+                  )
                 : limitedImages.length <= 3
-                ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: limitedImages.map((image) {
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Image.asset(image, fit: BoxFit.cover),
-                  ),
-                );
-              }).toList(),
-            )
-                : GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, // 3列
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: limitedImages.length,
-              itemBuilder: (context, index) {
-                return Image.asset(limitedImages[index], fit: BoxFit.cover);
-              },
-            ),
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: limitedImages.map((image) {
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Image.asset(image, fit: BoxFit.cover),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    : GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3, // 3列
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemCount: limitedImages.length,
+                        itemBuilder: (context, index) {
+                          return Image.asset(limitedImages[index],
+                              fit: BoxFit.cover);
+                        },
+                      ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -329,42 +342,40 @@ class DynamicMessageSection extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.thumb_up),
-                onPressed: () {
-                  print('点赞');
-                },
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.comment),
-                onPressed: () {
-                  print('评论');
-                },
-              ),
-            ],
+            // children: [
+            //   IconButton(
+            //     icon: const Icon(Icons.thumb_up),
+            //     onPressed: () {
+            //       print('点赞');
+            //     },
+            //   ),
+            //   // const SizedBox(width: 8),
+            //   // IconButton(
+            //   //   icon: const Icon(Icons.comment),
+            //   //   onPressed: () {
+            //   //     print('评论');
+            //   //   },
+            //   // ),
+            // ],
           ),
+          const Divider(color: Colors.grey),
         ],
       ),
     );
   }
 }
 
-
-
-
 // #docregion image-asset
 class ImageSection extends StatelessWidget {
   const ImageSection({super.key, required this.image});
 
-  final String image;
+  final String? image;
 
   @override
   Widget build(BuildContext context) {
     // #docregion image-asset
     return Image.asset(
-      image,
+      image!,
       width: 360,
       height: 240,
       fit: BoxFit.cover,
